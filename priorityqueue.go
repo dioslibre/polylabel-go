@@ -1,11 +1,11 @@
-package main
+package polylabel
 
 import "container/heap"
 
 // An Item is something we manage in a priority queue.
 type Item struct {
-	value    *Cell // The value of the item; arbitrary.
-	priority float64         // The priority of the item in the queue.
+	value    *Cell   // The value of the item; arbitrary.
+	priority float64 // The priority of the item in the queue.
 	// The index is needed by update and is maintained by the heap.Interface methods.
 	index int // The index of the item in the heap.
 }
@@ -26,6 +26,7 @@ func (pq PriorityQueue) Swap(i, j int) {
 	pq[j].index = j
 }
 
+// Push item
 func (pq *PriorityQueue) Push(x interface{}) {
 	n := len(*pq)
 	item := x.(*Item)
@@ -33,6 +34,7 @@ func (pq *PriorityQueue) Push(x interface{}) {
 	*pq = append(*pq, item)
 }
 
+// Pop item
 func (pq *PriorityQueue) Pop() interface{} {
 	old := *pq
 	n := len(old)

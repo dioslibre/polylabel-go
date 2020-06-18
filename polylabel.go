@@ -1,10 +1,11 @@
-package main
+package polylabel
 
 import (
 	"container/heap"
 	"math"
 )
 
+// Cell struct
 type Cell struct {
 	x   float64
 	y   float64
@@ -13,17 +14,18 @@ type Cell struct {
 	max float64
 }
 
-func NewCell(x float64, y float64, h float64, polygon [][][]float64) *Cell {
+func newCell(x float64, y float64, h float64, polygon [][][]float64) *Cell {
 	d := pointToPolygonDistance(x, y, polygon)
 	cell := Cell{x, y, h, d, d + h*math.Sqrt2}
 	return &cell
 }
 
-func NewCellItem(cell *Cell) *Item {
+func newCellItem(cell *Cell) *Item {
 	return &Item{cell, cell.d, 0}
 }
 
-func polylabel(polygon [][][]float64, precision float64) (float64, float64) {
+// PolyLabel calculate pole of inaccessibility
+func PolyLabel(polygon [][][]float64, precision float64) (float64, float64) {
 	minX, minY, maxX, maxY := boundingBox(polygon)
 
 	width := maxX - minX
@@ -40,7 +42,7 @@ func polylabel(polygon [][][]float64, precision float64) (float64, float64) {
 	// cover polygon with initial cells
 	for x := minX; x < maxX; x += cellSize {
 		for y := minY; y < maxY; y += cellSize {
-			heap.Push(&cellQueue, NewCellItem(NewCell(x+h, y+h, h, polygon)))
+			heap.Push(&cellQueue, newCellItem(newCell(x+h, y+h, h, polygon)))
 		}
 	}
 
@@ -48,7 +50,7 @@ func polylabel(polygon [][][]float64, precision float64) (float64, float64) {
 	bestCell := getCentroidCell(polygon)
 
 	// special case for rectangular polygons
-	bboxCell := NewCell(minX+width/2, minY+height/2, 0, polygon)
+	bboxCell := newCell(minX+width/2, minY+height/2, 0, polygon)
 	if bboxCell.d > bestCell.d {
 		bestCell = bboxCell
 	}
@@ -70,10 +72,10 @@ func polylabel(polygon [][][]float64, precision float64) (float64, float64) {
 
 		// split the cell into four cells
 		h = cell.h / 2
-		heap.Push(&cellQueue, NewCellItem(NewCell(cell.x-h, cell.y-h, h, polygon)))
-		heap.Push(&cellQueue, NewCellItem(NewCell(cell.x+h, cell.y-h, h, polygon)))
-		heap.Push(&cellQueue, NewCellItem(NewCell(cell.x-h, cell.y+h, h, polygon)))
-		heap.Push(&cellQueue, NewCellItem(NewCell(cell.x+h, cell.y+h, h, polygon)))
+		heap.Push(&cellQueue, newCellItem(newCell(cell.x-h, cell.y-h, h, polygon)))
+		heap.Push(&cellQueue, newCellItem(newCell(cell.x+h, cell.y-h, h, polygon)))
+		heap.Push(&cellQueue, newCellItem(newCell(cell.x-h, cell.y+h, h, polygon)))
+		heap.Push(&cellQueue, newCellItem(newCell(cell.x+h, cell.y+h, h, polygon)))
 	}
 
 	return bestCell.x, bestCell.y
@@ -139,9 +141,9 @@ func getCentroidCell(polygon [][][]float64) *Cell {
 		area += f * 3
 	}
 	if area == 0 {
-		return NewCell(ring[0][0], ring[0][1], 0, polygon)
+		return newCell(ring[0][0], ring[0][1], 0, polygon)
 	}
-	return NewCell(x/area, y/area, 0, polygon)
+	return newCell(x/area, y/area, 0, polygon)
 }
 
 // get squared distance from a point to a segment
